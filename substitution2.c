@@ -1,3 +1,9 @@
+/* Javius Santiago
+ * 1/8/2021
+ * Substitution2.c - This program uses a given key to cipher or decipher text
+ * using substitution
+ */
+
 #include <cs50.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -9,7 +15,8 @@
 // Prototypes
 bool checkKeyValidity(const char *key);
 int getIndex(const char *str, char element);
-char *cipher(char *plaintext, const char *key);
+void cipher(const char *key);
+void decipher(const char *key);
 
 const int keyLength = 26;
 const char *alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -17,35 +24,33 @@ const char *alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 int main(int argc, char const *argv[])
 {
     // Check usage
-    if (argc == 1 || argc > 2)
+    if (argc != 3)
     {
-        printf("Usage: ./substitution key\n");
+        printf("Usage: ./substitution [C]ipher/[D]ecipher key\n");
         return 1;
     }
-    if (strlen(argv[1]) != keyLength)
-    {
-        printf("Key must contain 26 characters.\n");
-        return 1;
-    }
-
-    const char *key = argv[1];
 
     // Check key validity
+    const char *key = argv[2];
     if (checkKeyValidity(key) == false)
     {
-        printf("INVALID KEY\n");
         return 1;
     }
 
-    // Get plaintext
-    char *plaintext = get_string("plainttext: ");
-
-    // Cipher text
-    char *ciphertext = cipher(plaintext, key);
-    printf("ciphertext: %s\n", ciphertext);
-
-    // Free memory allocated when cipher() was called
-    free(ciphertext);
+    // Cipher or Decipher based on users choice
+    if (strcasecmp(argv[1], "cipher") == 0 || strcasecmp(argv[1], "c") == 0)
+    {
+        cipher(key);
+    }
+    else if (strcasecmp(argv[1], "decipher") == 0 || strcasecmp(argv[1], "d") == 0)
+    {
+        decipher(key);
+    }
+    else
+    {
+        printf("Usage: ./substitution [C]ipher/[D]ecipher key\n");
+        return 1;
+    }
 
     return 0;
 }
@@ -56,19 +61,26 @@ bool checkKeyValidity(const char *key)
     // Array is used to ensure each letter is used exactly once in the key
     bool lettersUsed[keyLength];
 
+    // Ensure key length is correct
+    if (strlen(key) != keyLength)
+    {
+        printf("Key must contain 26 characters.\n");
+        return false;
+    }
+
     // Set each element in the array to be false originally
     for (int i = 0; i < keyLength; i++)
     {
         lettersUsed[i] = false;
     }
 
-    // Go through each character in the key
+    // Traverse each character in the key
     for (int i = 0; i < keyLength; i++)
     {
         // Check for non alphabetic characters
         if (isalpha(key[i]) == 0)
         {
-            printf("Key given contains a non alphabetic character\n");
+            printf("Key given contains a non alphabetic character: %c\n", key[i]);
             return false;
         }
 
@@ -101,9 +113,12 @@ int getIndex(const char *str, char element)
     return -1;
 }
 
-// Ciphers a given string according to a given key and returns the resulting text
-char *cipher(char *plaintext, const char *key)
+// Ciphers a given string according to a given key
+void cipher(const char *key)
 {
+    // Get plaintext
+    char *plaintext = get_string("plaintext: \t");
+
     char *ciphertext = malloc(sizeof(plaintext));
 
     // Loops through each char in the string (including the null terminating character)
@@ -128,5 +143,41 @@ char *cipher(char *plaintext, const char *key)
         }
     }
 
-    return ciphertext;
+    printf("ciphertext: \t%s\n", ciphertext);
+    free(ciphertext);
+}
+
+// Deciphers a given string according to a given key
+void decipher(const char *key)
+{
+    // Get ciphertext from user
+    char *ciphertext = get_string("ciphertext: \t");
+
+    char *plaintext = malloc(sizeof(ciphertext));
+
+    // Loops through each char in the string (including the null terminating character)
+    for (int i = 0; i < strlen(ciphertext) + 1; i++)
+    {
+        // If current char is a letter and uppercase
+        if (isupper(ciphertext[i]) != 0 && isalpha(ciphertext[i]) != 0)
+        {
+            // Set plaintext[i] equal to uppercase version of corresponding char
+            plaintext[i] = toupper(alphabet[getIndex(key, ciphertext[i])]);
+        }
+        // Else if current char is a letter but not uppercase
+        else if (isalpha(ciphertext[i]) != 0)
+        {
+            // Set plaintext[i] equal to lowercase version of corresponding char
+            plaintext[i] = tolower(alphabet[getIndex(key, ciphertext[i])]);
+        }
+        // Else if current char is not a letter
+        else
+        {
+            // Copy the char as it is
+            plaintext[i] = ciphertext[i];
+        }
+    }
+
+    printf("plaintext: \t%s\n", plaintext);
+    free(plaintext);
 }
