@@ -1,6 +1,6 @@
 # Substitution-2.0
 This is a modified version of my submission for Harvard's edX cs50 course.
-This version can cipher text the same way as the previous version but it also has the ability to decipher text per the below:
+This version can cipher text the same way as the previous version but it also has the ability to decipher text as shown below:
 
 Example 1:
   $ ./substitution2 cipher JTREKYAVOGDXPSNCUIZLFBMWHQ
